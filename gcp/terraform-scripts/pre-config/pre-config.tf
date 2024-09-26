@@ -1,6 +1,7 @@
 provider "google" {
   project = var.project_id
   region  = var.projectInfo.region
+  version = "5.44.0"
 }
 
 terraform {
@@ -119,6 +120,7 @@ resource "google_compute_global_address" "private_ip_block" {
   prefix_length = 16
   network       = google_compute_network.vpc.id
   project       = var.project_id
+  depends_on = [google_compute_subnetwork.gke_subnet]
 }
 
 resource "google_service_networking_connection" "service_nw" {
@@ -320,6 +322,14 @@ resource "google_container_cluster" "gke_cluster" {
   }
   depends_on          = [google_sql_database.db]
   deletion_protection = false
+  node_config {
+    linux_node_config {
+      sysctls = {
+
+        "vm.max_map_count" = 262144
+      }
+    }
+  }
 }
 
 resource "google_container_node_pool" "worker_pool" {
@@ -330,6 +340,11 @@ resource "google_container_node_pool" "worker_pool" {
   node_config {
     service_account = data.google_service_account.sa.email
     machine_type    = var.clusterInfo.nodepool_config[0].machine_type
+    linux_node_config {
+      sysctls = {
+        "vm.max_map_count" = 262144
+      }
+    }
   }
   autoscaling {
     min_node_count = var.clusterInfo.nodepool_config[0].min_node
@@ -340,6 +355,7 @@ resource "google_container_node_pool" "worker_pool" {
     auto_repair  = false
     auto_upgrade = false
   }
+
 }
 
 module "cloudbuild_private_pool" {
