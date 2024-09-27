@@ -16,7 +16,7 @@ networkInfo = {
     }
     services_ip_range = {
       range_name    = "servicess-range"
-      ip_cidr_range = "10.3.0.0/16"
+      ip_cidr_range = "10.4.0.0/24"
     }
   },
   operations_subnet = {
