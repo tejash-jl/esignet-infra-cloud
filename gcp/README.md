@@ -32,7 +32,9 @@ Currently, the below release version of the Helm charts will be deployed. The ve
 | mosip/oidc-ui              | 1.4.1         | mosipid/oidc-ui              | 1.4.1                |
 | mosip/keycloak-init        | 12.0.1        | mosipid/keycloak-init        | 1.2.0.1              |
 | mosip/mock-identity-system | 0.9.3         | mosipid/mock-identity-system | 0.9.3                |
-
+ 
+ **.env**
+  - helm chart values which includes Docker Image,chart version,Docker Version, repository can be passed into the .env file and can be called dynamically while deploying.
 
 ### Pre-requisites
 
@@ -89,8 +91,7 @@ Currently, the below release version of the Helm charts will be deployed. The ve
             - **pre-config**
                 - **pre-config.tfvars**
                     - Actual values for the variable template defined in **variables.tf** to be passed to **pre-config.tf**
-    - **.env**
-        - helm chart values which includes images,version,repository can be passed into the env files and can be called dynamically while deploying.
+
 
 ### Infrastructure Deployment
 
