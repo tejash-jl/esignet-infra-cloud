@@ -89,6 +89,8 @@ Currently, the below release version of the Helm charts will be deployed. The ve
             - **pre-config**
                 - **pre-config.tfvars**
                     - Actual values for the variable template defined in **variables.tf** to be passed to **pre-config.tf**
+    - **.env**
+        - helm chart values which includes images,version,repository can be passed into the env files and can be called dynamically while deploying.
 
 ### Infrastructure Deployment
 
