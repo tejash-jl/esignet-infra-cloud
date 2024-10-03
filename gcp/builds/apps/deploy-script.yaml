@@ -106,22 +106,22 @@ steps:
       wget https://github.com/mikefarah/yq/releases/download/v4.44.2/yq_linux_amd64.tar.gz -O - | tar xz && mv yq_linux_amd64 /usr/bin/yq
       export $(grep -v '^#' .env | xargs -d '\n')
       helm repo add mosip $mosip_repo
-      helm install softhsm mosip/softhsm -n esignet --create-namespace --set image.repository="" --set image.tag="$softhsm_docker_version" -f deployments/configs/softhsm.yaml --version="" --wait
-      helm install artifactory mosip/artifactory -n esignet --create-namespace --set image.repository="" --set image.tag=$artifactory_docker_version --version="" --wait
+      helm install softhsm mosip/softhsm -n esignet --create-namespace  --set image.tag="$softhsm_docker_version" -f deployments/configs/softhsm.yaml  --wait
+      helm install artifactory mosip/artifactory -n esignet --create-namespace  --set image.tag=$artifactory_docker_version  --wait
       sqlIP=$(gcloud sql instances describe ${_DB_NAME_} --format=json  | jq -r ".ipAddresses[0].ipAddress") &&
       sqlPass=$(gcloud secrets versions access latest --secret ${_SECRET_NAME_}) &&
-      helm install keycloak mosip/keycloak -n esignet --create-namespace --version="" -f deployments/configs/keycloak.yaml --set ingress.hostname=${_DOMAIN_} --set externalDatabase.host=$sqlIP --set externalDatabase.password=$sqlPass --set image.repository="" --set image.tag=$keycloak_docker_version --wait
+      helm install keycloak mosip/keycloak -n esignet --create-namespace  -f deployments/configs/keycloak.yaml --set ingress.hostname=${_DOMAIN_} --set externalDatabase.host=$sqlIP --set externalDatabase.password=$sqlPass  --set image.tag=$keycloak_docker_version --wait
       kubectl create secret -n esignet generic postgres --from-literal=password="$sqlPass" &&
-      helm -n esignet install postgres-init mosip/postgres-init -f deployments/configs/db_init.yaml --version="" --set databases.mosip_esignet.host=$sqlIP --set image.repository="" --set image.tag=$postgres_init_docker_version --wait
+      helm -n esignet install postgres-init mosip/postgres-init -f deployments/configs/db_init.yaml  --set databases.mosip_esignet.host=$sqlIP --set image.tag=$postgres_init_docker_version --wait
       sh deployments/scripts/config-init.sh ${_DOMAIN_} ${_DB_NAME_} ${_SECRET_NAME_} ${_REDIS_NAME_} ${_REGION_} ${_ENABLE_MOCK_}
-      helm -n esignet template esignet mosip/esignet --version="" -f deployments/configs/esignet-values.yaml --set image.repository="" --set image.tag=$esignet_docker_version > deploy.yaml
+      helm -n esignet template esignet mosip/esignet  -f deployments/configs/esignet-values.yaml  --set image.tag=$esignet_docker_version > deploy.yaml
       yq  e -i 'select(di == 3).spec.template.spec.volumes += [{"name":"esignet-properties","configMap":{"name":"esignet-local-properties"}}]' deploy.yaml
       yq e -i 'select(di == 3).spec.template.spec.containers[0] += {"volumeMounts":[{"mountPath":"/home/mosip/esignet-local.properties","name":"esignet-properties","subPath":"esignet-local.properties"}]}' deploy.yaml
       kubectl apply -f deploy.yaml -n esignet
-      helm -n esignet install oidc-ui mosip/oidc-ui -f deployments/configs/ui-values.yaml --version="" --set image.repository="" --set image.tag=$oidcui_docker_version --wait
+      helm -n esignet install oidc-ui mosip/oidc-ui -f deployments/configs/ui-values.yaml  --set image.tag=$oidcui_docker_version --wait
       cat deployments/configs/ingress.yaml | sed 's/DOMAIN/${_DOMAIN_}/'  | kubectl apply -n esignet -f -
       kubectl create configmap keycloak-host --from-literal=keycloak-internal-service-url=http://keycloak.esignet.svc.cluster.local:80/auth/ -n esignet &&
-      helm -n esignet install keycloak-init mosip/keycloak-init --set frontend=https://${_DOMAIN_}/auth --version="" --set image.repository="" --set image.tag=$keycloak_init_docker_version
+      helm -n esignet install keycloak-init mosip/keycloak-init --set frontend=https://${_DOMAIN_}/auth  --set image.tag=$keycloak_init_docker_version
       set +a
   waitFor:
     - 'kafka-server-install'
@@ -139,7 +139,7 @@ steps:
         apt-get update
         apt-get install wget -y
         wget https://github.com/mikefarah/yq/releases/download/v4.44.2/yq_linux_amd64.tar.gz -O - | tar xz && mv yq_linux_amd64 /usr/bin/yq
-        helm  -n esignet template mock-identity-system mosip/mock-identity-system --version="" -f deployments/configs/mock-identity-values.yaml --set image.repository="" --set image.tag=$mock_ida_docker_version > deploy.yaml
+        helm  -n esignet template mock-identity-system mosip/mock-identity-system  -f deployments/configs/mock-identity-values.yaml  --set image.tag=$mock_ida_docker_version > deploy.yaml
         yq  e -i 'select(di == 3).spec.template.spec.volumes += [{"name":"mock-identity-properties","configMap":{"name":"mock-identity-properties"}}]' deploy.yaml
         yq e -i 'select(di == 3).spec.template.spec.containers[0] += {"volumeMounts":[{"mountPath":"/home/mosip/mock-identity-system-default.properties","name":"mock-identity-properties","subPath":"mock-identity-system-default.properties"}]}' deploy.yaml
         kubectl apply -f deploy.yaml -n esignet
