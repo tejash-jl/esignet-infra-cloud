@@ -100,11 +100,11 @@ CLUSTER=
 DOMAIN_NAME=
 EMAIL_ID=
 ENABLE_MOCK=false # to enable deployment of mock ida 
-alias k=kubectl
+alias k=kubectl ```
 
 #Bash script for setting up authentication, configuring the project, enabling services, and creating a service account in GCP:
 
-'''
+```
 #!/bin/bash
 # Authenticate user to gcloud
 gcloud auth login
@@ -140,7 +140,7 @@ gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$GSA 
 gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$GSA --role=roles/iam.serviceAccountTokenCreator
 
 echo "Service Account $GSA_DISPLAY_NAME created and assigned required roles."
-'''
+```
 save the script as setup_gcp.sh and then execute it.
 
 # To execute the script
