@@ -46,9 +46,9 @@ Currently, the below release version of the Helm charts will be deployed. The ve
 
 - [**Install kubectl**]
 
-Link: https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl#apt)
+  Link: https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl#apt
 
-Follow the steps mentioned in the above link to install Kubectl and configure
+  Follow the steps mentioned in the above link to install Kubectl
 
 
 - [**Install Helm**]
@@ -104,7 +104,7 @@ alias k=kubectl
 
 #Bash script for setting up authentication, configuring the project, enabling services, and creating a service account in GCP:
 
-```
+'''
 #!/bin/bash
 # Authenticate user to gcloud
 gcloud auth login
@@ -140,7 +140,7 @@ gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$GSA 
 gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$GSA --role=roles/iam.serviceAccountTokenCreator
 
 echo "Service Account $GSA_DISPLAY_NAME created and assigned required roles."
-```
+'''
 save the script as setup_gcp.sh and then execute it.
 
 # To execute the script
