@@ -142,8 +142,7 @@ gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$GSA 
 echo "Service Account $GSA_DISPLAY_NAME created and assigned required roles."
 ```
 save the script as setup_gcp.sh and then execute it.
-
-# To execute the script
+##**To execute the script**
 bash setup_gcp.sh
 
 
