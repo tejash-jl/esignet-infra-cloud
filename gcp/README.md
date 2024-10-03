@@ -104,7 +104,7 @@ alias k=kubectl ```
 
 #Bash script for setting up authentication, configuring the project, enabling services, and creating a service account in GCP:
 
-```bash
+
 #!/bin/bash
 # Authenticate user to gcloud
 gcloud auth login
