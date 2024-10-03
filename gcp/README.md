@@ -100,13 +100,14 @@ DOMAIN_NAME=
 EMAIL_ID=
 ENABLE_MOCK=false # to enable deployment of mock ida 
 alias k=kubectl
-
-####script to setup authentication, configuring the project, enabling services, and creating a service account in GCP:
+```
+```
+**####script to setup authentication, configuring the project, enabling services, and creating a service account in GCP**:
 script file located at `deployment/scripts/setup_gcp.sh` 
 
-####**To execute the script**
+**####To execute the script**
 bash setup_gcp.sh
-
+```
 
 #### Deploy Infrastructure using Terraform
 
