@@ -53,9 +53,9 @@ Currently, the below release version of the Helm charts will be deployed. The ve
 
 - [**Install Helm**]
 
- Link: https://helm.sh/docs/intro/install/
-
- Follow the steps mentioned in the above link to install helm
+  Link: https://helm.sh/docs/intro/install/
+  
+  Follow the steps mentioned in the above link to install helm
 
 ### Workspace - Folder structure
 
