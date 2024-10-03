@@ -4,7 +4,19 @@
 
 ## Introduction
 
-## Deployment Approach
+This project leverages a cloud-native, microservices-based architecture, primarily using Google Kubernetes Engine (GKE) to orchestrate and manage containerized applications.
+
+### Overview
+    - **Kubernetes (GKE)**: Google Kubernetes Engine (GKE) is used as the core platform for container orchestration.
+    - **Artifactory Service**: Artifactory acts as a repository manager, handling storage, distribution, and versioning of build artifacts, such as Docker images and libraries.
+    - **Keycloak**: Keycloak provides identity and access management, allowing for centralized authentication and authorization.
+    - **OIDC (OpenID Connect)**: OIDC is used for user authentication across services, ensuring secure communication between microservices and enabling Single Sign-On (SSO) functionality.
+    - **Softhsm**: Softhsm is utilized for secure key storage and cryptographic operations.
+    - **Esignet Service**: Esignet is the central service responsible for handling digital signatures and cryptographic operations.
+    - **Source Repository and Cloud Build**: Each commit triggers an automated build process that compiles, tests, and deploys the code to the GKE cluster.
+
+
+### Deployment Approach
 
 Deployment uses the following tools:
 
