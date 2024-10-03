@@ -44,30 +44,18 @@ Currently, the below release version of the Helm charts will be deployed. The ve
 
 - #### [Run gcloud commands with Cloud Shell](https://cloud.google.com/shell/docs/run-gcloud-commands)
 
-- [**Install kubectl**](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl#apt)
+- [**Install kubectl**]
 
-  ```bash
-  sudo apt-get update
-  sudo apt-get install kubectl
-  kubectl version --client
-  
-  sudo apt-get install google-cloud-sdk-gke-gcloud-auth-plugin
-  ```
+Link: https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl#apt)
 
-- [**Install Helm**](https://helm.sh/docs/intro/install/)
+Follow the steps mentioned in the above link to install Kubectl and configure
 
-  ```bash
-  curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
-  
-  sudo apt-get install apt-transport-https --yes
-  
-  echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
-  
-  sudo apt-get update
-  sudo apt-get install helm
-  
-  helm version --client
-  ```
+
+- [**Install Helm**]
+
+ Link: https://helm.sh/docs/intro/install/
+
+ Follow the steps mentioned in the above link to install helm
 
 ### Workspace - Folder structure
 
@@ -113,21 +101,20 @@ DOMAIN_NAME=
 EMAIL_ID=
 ENABLE_MOCK=false # to enable deployment of mock ida 
 alias k=kubectl
+
+#Bash script for setting up authentication, configuring the project, enabling services, and creating a service account in GCP:
+
 ```
-
-#### Authenticate user to gcloud
-
-```bash
+#!/bin/bash
+# Authenticate user to gcloud
 gcloud auth login
 gcloud auth list
 gcloud config set account $OWNER
-```
 
-#### Setup current project
-
-```bash
+# Setup current project
 gcloud config set project $PROJECT_ID
 
+# Enable required services
 gcloud services enable cloudresourcemanager.googleapis.com
 gcloud services enable compute.googleapis.com
 gcloud services enable container.googleapis.com
@@ -140,28 +127,25 @@ gcloud services enable cloudbuild.googleapis.com
 gcloud services enable sqladmin.googleapis.com
 gcloud services enable secretmanager.googleapis.com
 gcloud services enable servicenetworking.googleapis.com
-
+# Set region and zone
 gcloud config set compute/region $REGION
 gcloud config set compute/zone $ZONE
-```
-
-#### Setup Service Account
-
-Current authenticated user will handover control to a **Service Account** which would be used for all subsequent resource deployment and management
-
-```bash
+# Create Service Account
 gcloud iam service-accounts create $GSA_DISPLAY_NAME --display-name=$GSA_DISPLAY_NAME
+# List all service accounts
 gcloud iam service-accounts list
-
-# Make SA as the owner
+# Assign roles to the Service Account
 gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$GSA --role=roles/owner
-
-# ServiceAccountUser role for the SA
 gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$GSA --role=roles/iam.serviceAccountUser
-
-# ServiceAccountTokenCreator role for the SA
 gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$GSA --role=roles/iam.serviceAccountTokenCreator
+
+echo "Service Account $GSA_DISPLAY_NAME created and assigned required roles."
 ```
+save the script as setup_gcp.sh and then execute it.
+
+# To execute the script
+bash setup_gcp.sh
+
 
 #### Deploy Infrastructure using Terraform
 
@@ -210,8 +194,6 @@ _**Before moving to the next step, you need to create domain/sub-domain and crea
 
 
 #### Deploy service
-
-##### Deploy Landing Zone
 
 ```bash
 cd $BASEFOLDERPATH
