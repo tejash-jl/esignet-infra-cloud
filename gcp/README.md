@@ -38,9 +38,8 @@ Currently, the below release version of the Helm charts will be deployed. The ve
 
 ### Pre-requisites
 
-- ### [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install)
+- #### [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install)
 
-- #### Alternate
 
 - #### [Run gcloud commands with Cloud Shell](https://cloud.google.com/shell/docs/run-gcloud-commands)
 
