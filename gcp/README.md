@@ -66,14 +66,14 @@ Currently, the below release version of the Helm charts will be deployed. The ve
 
   Link: https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl#apt
 
-  Follow the steps mentioned in the above link to install Kubectl
+  Follow the steps mentioned in the above link to install Kubectl.
 
 
 - #### **Install Helm**
 
   Link: https://helm.sh/docs/intro/install/
   
-  Follow the steps mentioned in the above link to install helm
+  Follow the steps mentioned in the above link to install helm.
 
 ### Workspace - Folder structure
 
