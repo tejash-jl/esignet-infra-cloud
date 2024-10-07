@@ -103,7 +103,7 @@ Currently, the below release version of the Helm charts will be deployed. The ve
 
 ![deploy-approach](assets/deploy-approach.png)
 
-## Step-by-Step guide
+#### Step-by-Step guide
 
 #### Setup CLI environment variables
 
