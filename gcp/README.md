@@ -4,7 +4,26 @@
 
 ## Introduction
 
-## Deployment Approach
+This project leverages a cloud-native, microservices-based architecture, primarily using Google Kubernetes Engine (GKE) to orchestrate and manage containerized applications.
+
+### Overview
+
+- **Kubernetes (GKE)** - Google Kubernetes Engine (GKE) is used as the core platform for container orchestration.
+    
+- **Artifactory Service** - Artifactory acts as a repository manager, handling storage, distribution, and versioning of build artifacts, such as Docker images and libraries.
+    
+- **Keycloak** - Keycloak provides identity and access management, allowing for centralized authentication and authorization.
+    
+- **OIDC (OpenID Connect)** - OIDC is used for user authentication across services, ensuring secure communication between microservices and enabling Single Sign-On (SSO) functionality.
+    
+- **Softhsm** - Softhsm is utilized for secure key storage and cryptographic operations.
+    
+- **Esignet Service** - Esignet is the central service responsible for handling digital signatures and cryptographic operations.
+    
+- **Source Repository and Cloud Build** - Each commit triggers an automated build process that compiles, tests, and deploys the code to the GKE cluster.
+
+
+### Deployment Approach
 
 Deployment uses the following tools:
 
@@ -32,40 +51,29 @@ Currently, the below release version of the Helm charts will be deployed. The ve
 | mosip/oidc-ui              | 1.4.1         | mosipid/oidc-ui              | 1.4.1                |
 | mosip/keycloak-init        | 12.0.1        | mosipid/keycloak-init        | 1.2.0.1              |
 | mosip/mock-identity-system | 0.9.3         | mosipid/mock-identity-system | 0.9.3                |
-
+ 
+ **.env**
+  - helm chart values which includes Docker Image,chart version,Docker Version, repository can be passed into the .env file and can be called dynamically while deploying.
 
 ### Pre-requisites
 
-- ### [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install)
+- #### [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install)
 
-- #### Alternate
 
 - #### [Run gcloud commands with Cloud Shell](https://cloud.google.com/shell/docs/run-gcloud-commands)
 
-- [**Install kubectl**](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl#apt)
+- #### **Install kubectl**
 
-  ```bash
-  sudo apt-get update
-  sudo apt-get install kubectl
-  kubectl version --client
-  
-  sudo apt-get install google-cloud-sdk-gke-gcloud-auth-plugin
-  ```
+  Link: https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl#apt
 
-- [**Install Helm**](https://helm.sh/docs/intro/install/)
+  Follow the steps mentioned in the above link to install Kubectl.
 
-  ```bash
-  curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+
+- #### **Install Helm**
+
+  Link: https://helm.sh/docs/intro/install/
   
-  sudo apt-get install apt-transport-https --yes
-  
-  echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
-  
-  sudo apt-get update
-  sudo apt-get install helm
-  
-  helm version --client
-  ```
+  Follow the steps mentioned in the above link to install helm.
 
 ### Workspace - Folder structure
 
@@ -90,11 +98,12 @@ Currently, the below release version of the Helm charts will be deployed. The ve
                 - **pre-config.tfvars**
                     - Actual values for the variable template defined in **variables.tf** to be passed to **pre-config.tf**
 
+
 ### Infrastructure Deployment
 
 ![deploy-approach](assets/deploy-approach.png)
 
-## Step-by-Step guide
+#### Step-by-Step guide
 
 #### Setup CLI environment variables
 
@@ -112,52 +121,12 @@ ENABLE_MOCK=false # to enable deployment of mock ida
 alias k=kubectl
 ```
 
-#### Authenticate user to gcloud
-
-```bash
-gcloud auth login
-gcloud auth list
-gcloud config set account $OWNER
+#### **script to setup authentication, configuring the project, enabling services, and creating a service account in GCP**:
 ```
+script file located at `deployment/scripts/setup_gcp.sh` 
 
-#### Setup current project
-
-```bash
-gcloud config set project $PROJECT_ID
-
-gcloud services enable cloudresourcemanager.googleapis.com
-gcloud services enable compute.googleapis.com
-gcloud services enable container.googleapis.com
-gcloud services enable storage.googleapis.com
-gcloud services enable run.googleapis.com
-gcloud services enable servicenetworking.googleapis.com
-gcloud services enable cloudkms.googleapis.com
-gcloud services enable certificatemanager.googleapis.com
-gcloud services enable cloudbuild.googleapis.com
-gcloud services enable sqladmin.googleapis.com
-gcloud services enable secretmanager.googleapis.com
-gcloud services enable servicenetworking.googleapis.com
-
-gcloud config set compute/region $REGION
-gcloud config set compute/zone $ZONE
-```
-
-#### Setup Service Account
-
-Current authenticated user will handover control to a **Service Account** which would be used for all subsequent resource deployment and management
-
-```bash
-gcloud iam service-accounts create $GSA_DISPLAY_NAME --display-name=$GSA_DISPLAY_NAME
-gcloud iam service-accounts list
-
-# Make SA as the owner
-gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$GSA --role=roles/owner
-
-# ServiceAccountUser role for the SA
-gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$GSA --role=roles/iam.serviceAccountUser
-
-# ServiceAccountTokenCreator role for the SA
-gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$GSA --role=roles/iam.serviceAccountTokenCreator
+**To execute the script**
+bash setup_gcp.sh
 ```
 
 #### Deploy Infrastructure using Terraform
@@ -207,8 +176,6 @@ _**Before moving to the next step, you need to create domain/sub-domain and crea
 
 
 #### Deploy service
-
-##### Deploy Landing Zone
 
 ```bash
 cd $BASEFOLDERPATH

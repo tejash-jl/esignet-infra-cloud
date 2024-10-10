@@ -467,4 +467,3 @@ output "lb_public_ip" {
 output "sql_private_ip" {
   value = google_sql_database_instance.db_instance.ip_address.0.ip_address
 }
-
