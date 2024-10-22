@@ -119,7 +119,9 @@ steps:
       yq e -i 'select(di == 3).spec.template.spec.containers[0] += {"volumeMounts":[{"mountPath":"/home/mosip/esignet-local.properties","name":"esignet-properties","subPath":"esignet-local.properties"}]}' deploy.yaml
       kubectl apply -f deploy.yaml -n esignet
       helm -n esignet install oidc-ui mosip/oidc-ui -f deployments/configs/ui-values.yaml --version $oidcui_helm_version --set image.repository=$oidcui_docker_image --set image.tag=$oidcui_docker_version --wait
-      cat deployments/configs/ingress.yaml | sed 's/DOMAIN/${_DOMAIN_}/'  | kubectl apply -n esignet -f -
+      #cat deployments/configs/ingress.yaml | sed 's/DOMAIN/${_DOMAIN_}/'  | kubectl apply -n esignet -f -
+      cat deployments/configs/certificate.yaml | sed 's/DOMAIN/${_DOMAIN_}/' | kubectl apply -n esignet -f -
+      cat deployments/configs/gateway.yaml | sed 's/DOMAIN/${_DOMAIN_}/' | kubectl apply -n esignet -f -
       kubectl create configmap keycloak-host --from-literal=keycloak-internal-service-url=http://keycloak.esignet.svc.cluster.local:80/auth/ -n esignet &&
       helm -n esignet install keycloak-init mosip/keycloak-init --set frontend=https://${_DOMAIN_}/auth --version $keycloak_init_helm_version --set image.repository=$keycloak_init_docker_image --set image.tag=$keycloak_init_docker_version
       set +a
@@ -143,7 +145,7 @@ steps:
         yq  e -i 'select(di == 3).spec.template.spec.volumes += [{"name":"mock-identity-properties","configMap":{"name":"mock-identity-properties"}}]' deploy.yaml
         yq e -i 'select(di == 3).spec.template.spec.containers[0] += {"volumeMounts":[{"mountPath":"/home/mosip/mock-identity-system-default.properties","name":"mock-identity-properties","subPath":"mock-identity-system-default.properties"}]}' deploy.yaml
         kubectl apply -f deploy.yaml -n esignet
-        cat deployments/configs/mock-identity-ingress.yaml | sed 's/DOMAIN/${_DOMAIN_}/'  | kubectl apply -n esignet -f -
+        #cat deployments/configs/mock-identity-ingress.yaml | sed 's/DOMAIN/${_DOMAIN_}/'  | kubectl apply -n esignet -f -
       else
         echo "Skipping mock service setup"
       fi

@@ -5,6 +5,19 @@ enable_insecure: false
 istio:
   enabled: false
 
+istio:
+  enabled: true
+  ingressController:
+    name: ingressgateway
+  gateways:
+    - name: esignet-gateway
+      protocol: HTTP
+      portName: http
+      port: 80
+  hosts:
+    - DOMAIN
+  prefix: /
+
 serviceMonitor:
   enabled: false
 

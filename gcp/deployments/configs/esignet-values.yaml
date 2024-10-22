@@ -11,7 +11,10 @@ extraEnvVars:
 enable_insecure: false
 
 istio:
-  enabled: false
+  enabled: true
+  gateways:
+    - istio-system/esignet-gateway
+  prefix: /v1/esignet/
 
 serviceMonitor:
   enabled: false
