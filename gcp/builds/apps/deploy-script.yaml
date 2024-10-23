@@ -2,54 +2,66 @@ steps:
 - name: 'gcr.io/cloud-builders/gcloud'
   id: 'get-credentials'
   args: ['container', 'clusters', 'get-credentials', '${_CLUSTER_NAME_}', '--project=${_PROJECT_ID_}', '--region=${_REGION_}', '--internal-ip']
+
+
 - name: 'gcr.io/${_PROJECT_ID_}/helm:3.12.0'
   id: 'ingress-cluster-admin'
   entrypoint: 'bash'
   args:
     - -c
     - |
-      if [[ ${_SKIP_INGRESS_} == "false" ]]
-      then
-          kubectl create clusterrolebinding cluster-admin-binding --clusterrole cluster-admin --user $(gcloud config get-value account)
-      else
-        echo "Skipping creating cluster role binding"
-      fi
+      kubectl create clusterrolebinding cluster-admin-binding --clusterrole cluster-admin --user $(gcloud config get-value account)
   waitFor:
     - 'get-credentials'
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  id: 'install-ingress'
+
+
+- name: 'gcr.io/${_PROJECT_ID_}/helm:3.12.0'
+  id: 'install-istio-base'
   entrypoint: 'bash'
   args:
     - -c
     - |
-      if [[ ${_SKIP_INGRESS_} == "false" ]]
-      then
-          bash ./deployments/scripts/ingress-init.sh ${_REGION_} ${_LB_NAME_}
-      else
-        echo "Skipping creating ingress"
-      fi
+      helm install istio-base istio/base -n istio-system --create-namespace --set defaultRevision=default --wait
   waitFor:
     - 'ingress-cluster-admin'
+
+- name: 'gcr.io/${_PROJECT_ID_}/helm:3.12.0'
+  id: 'install-istiod'
+  entrypoint: 'bash'
+  args:
+    - -c
+    - |
+      helm install istiod istio/istiod -n istio-system --wait
+  waitFor:
+    - 'install-istio-base'
+
+- name: 'gcr.io/${_PROJECT_ID_}/helm:3.12.0'
+  id: 'install-istio-ingressgateway'
+  entrypoint: 'bash'
+  args:
+    - -c
+    - |
+      helm install istio-ingressgateway istio/gateway -n istio-system --wait
+  waitFor:
+    - 'install-istiod'
+
 - name: 'gcr.io/${_PROJECT_ID_}/helm:3.12.0'
   id: 'helm-cert-manager-repo'
   entrypoint: 'helm'
   args: ['repo', 'add', 'jetstack', 'https://charts.jetstack.io']
   waitFor:
-    - 'install-ingress'
+    - 'install-istio-ingressgateway'
+
 - name: 'gcr.io/${_PROJECT_ID_}/helm:3.12.0'
   id: 'install-certs-manager'
   entrypoint: 'bash'
   args:
     - -c
     - |
-      if [[ ${_SKIP_INGRESS_} == "false" ]]
-      then
-        helm install cert-manager jetstack/cert-manager --version v1.15.1 -n cert-manager --create-namespace --set crds.enabled=true
-      else
-        echo "Skipping cert manager setup"
-      fi
+      helm install cert-manager jetstack/cert-manager --version v1.16.1 -n cert-manager --create-namespace --set crds.enabled=true
   waitFor:
     - 'helm-cert-manager-repo'
+
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   id: 'certs-issuer'
   entrypoint: 'bash'
@@ -60,30 +72,35 @@ steps:
       cat deployments/configs/cert-issuer.yaml | sed "s/EMAIL/${_EMAIL_ID_}/g" | sed "s/DOMAIN/${_DOMAIN_}/g" | kubectl apply -n esignet -f -
   waitFor:
     - 'install-certs-manager'
+
 - name: 'gcr.io/${_PROJECT_ID_}/helm:3.12.0'
   id: 'helm-kafka-repo'
   entrypoint: 'helm'
   args: ['repo', 'add', 'strimzi', 'https://strimzi.io/charts/']
   waitFor:
     - 'certs-issuer'
+
 - name: 'gcr.io/${_PROJECT_ID_}/helm:3.12.0'
   id: 'helm-kafka-ui-repo'
   entrypoint: 'helm'
   args: ['repo', 'add', 'kafka-ui', 'https://provectus.github.io/kafka-ui-charts']
   waitFor:
     - 'helm-kafka-repo'
+
 - name: 'gcr.io/${_PROJECT_ID_}/helm:3.12.0'
   id: 'helm-kafka-install'
   entrypoint: 'helm'
   args: ['install', 'strimzi', 'strimzi/strimzi-kafka-operator', '-n', 'kafka', '--create-namespace']
   waitFor:
     - 'helm-kafka-ui-repo'
+
 - name: 'gcr.io/${_PROJECT_ID_}/helm:3.12.0'
   id: 'helm-kafka-ui-install'
   entrypoint: 'helm'
   args: ['install', 'kafka-ui', 'kafka-ui/kafka-ui', '-n', 'kafka', '-f', 'deployments/configs/kafka-ui-values.yaml']
   waitFor:
     - 'helm-kafka-install'
+
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   id: 'kafka-server-install'
   entrypoint: 'bash'
@@ -93,6 +110,7 @@ steps:
       kubectl apply -f deployments/configs/kafka.yml -n kafka
   waitFor:
     - 'helm-kafka-ui-install'
+    
 - name: 'gcr.io/${_PROJECT_ID_}/helm:3.12.0'
   id: 'helm-esignet-install'
   entrypoint: 'bash'

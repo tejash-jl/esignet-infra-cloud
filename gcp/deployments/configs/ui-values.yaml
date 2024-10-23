@@ -3,9 +3,6 @@ extraEnvVars:
 enable_insecure: false
 
 istio:
-  enabled: false
-
-istio:
   enabled: true
   ingressController:
     name: ingressgateway
