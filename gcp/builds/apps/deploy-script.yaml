@@ -125,6 +125,14 @@ steps:
       apt-get install jq wget -y &&
       wget https://github.com/mikefarah/yq/releases/download/v4.44.2/yq_linux_amd64.tar.gz -O - | tar xz && mv yq_linux_amd64 /usr/bin/yq
       export $(grep -v '^#' .env | xargs -d '\n')
+
+      loadbalancerip=$(gcloud compute addresses describe "${_LB_NAME_}" --region "${_REGION_}" --format json | jq -r ".address")
+      echo "Load Balancer IP: $loadbalancerip"
+
+      # Patch the Istio ingress gateway with the Load Balancer IP
+      kubectl patch svc istio-ingressgateway --namespace istio-system --patch "{\"spec\": { \"loadBalancerIP\": \"$loadbalancerip\" }}"
+      echo "Istio ingress gateway patched with Load Balancer IP"
+
       helm repo add mosip $mosip_repo
       helm install softhsm mosip/softhsm -n esignet --create-namespace --set image.repository="$softhsm_docker_image" --set image.tag="$softhsm_docker_version" -f deployments/configs/softhsm.yaml --version "$softhsm_helm_version" --wait
       helm install artifactory mosip/artifactory -n esignet --create-namespace --set image.repository=$artifactory_docker_image --set image.tag=$artifactory_docker_version --version $artifactory_helm_version --wait
@@ -140,7 +148,7 @@ steps:
       kubectl apply -f deploy.yaml -n esignet
       helm -n esignet install oidc-ui mosip/oidc-ui -f deployments/configs/ui-values.yaml --version $oidcui_helm_version --set image.repository=$oidcui_docker_image --set image.tag=$oidcui_docker_version --wait
       #cat deployments/configs/ingress.yaml | sed 's/DOMAIN/${_DOMAIN_}/'  | kubectl apply -n esignet -f -
-      cat deployments/configs/certificate.yaml | sed 's/DOMAIN/${_DOMAIN_}/' | kubectl apply -n esignet -f -
+      cat deployments/configs/certificate.yaml | sed 's/DOMAIN/${_DOMAIN_}/' | kubectl apply -n istio-system -f -
       cat deployments/configs/gateway.yaml | sed 's/DOMAIN/${_DOMAIN_}/' | kubectl apply -n esignet -f -
       kubectl create configmap keycloak-host --from-literal=keycloak-internal-service-url=http://keycloak.esignet.svc.cluster.local:80/auth/ -n esignet &&
       helm -n esignet install keycloak-init mosip/keycloak-init --set frontend=https://${_DOMAIN_}/auth --version $keycloak_init_helm_version --set image.repository=$keycloak_init_docker_image --set image.tag=$keycloak_init_docker_version
