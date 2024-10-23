@@ -142,10 +142,12 @@ steps:
       kubectl create secret -n esignet generic postgres --from-literal=password="$sqlPass" &&
       helm -n esignet install postgres-init mosip/postgres-init -f deployments/configs/db_init.yaml --version $postgres_init_helm_version --set databases.mosip_esignet.host=$sqlIP --set image.repository=$postgres_init_docker_image --set image.tag=$postgres_init_docker_version --wait
       sh deployments/scripts/config-init.sh ${_DOMAIN_} ${_DB_NAME_} ${_SECRET_NAME_} ${_REDIS_NAME_} ${_REGION_} ${_ENABLE_MOCK_}
+      sed -i -E "s/DOMAIN/${_DOMAIN_}/g" deployments/configs/esignet-values.yaml
       helm -n esignet template esignet mosip/esignet --version $esignet_helm_version -f deployments/configs/esignet-values.yaml --set image.repository=$esignet_docker_image --set image.tag=$esignet_docker_version > deploy.yaml
       yq  e -i 'select(di == 3).spec.template.spec.volumes += [{"name":"esignet-properties","configMap":{"name":"esignet-local-properties"}}]' deploy.yaml
       yq e -i 'select(di == 3).spec.template.spec.containers[0] += {"volumeMounts":[{"mountPath":"/home/mosip/esignet-local.properties","name":"esignet-properties","subPath":"esignet-local.properties"}]}' deploy.yaml
       kubectl apply -f deploy.yaml -n esignet
+      sed -i -E "s/DOMAIN/${_DOMAIN_}/g" deployments/configs/ui-values.yaml
       helm -n esignet install oidc-ui mosip/oidc-ui -f deployments/configs/ui-values.yaml --version $oidcui_helm_version --set image.repository=$oidcui_docker_image --set image.tag=$oidcui_docker_version --wait
       #cat deployments/configs/ingress.yaml | sed 's/DOMAIN/${_DOMAIN_}/'  | kubectl apply -n esignet -f -
       cat deployments/configs/certificate.yaml | sed 's/DOMAIN/${_DOMAIN_}/' | kubectl apply -n istio-system -f -
