@@ -3,3 +3,4 @@ kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/con
 kubectl delete ns esignet
 kubectl delete ns cert-manager
 kubectl delete ns kafka
+kubectl delete ns istio-system
