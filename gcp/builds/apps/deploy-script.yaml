@@ -71,7 +71,7 @@ steps:
     - -c
     - |
       kubectl create ns esignet &&
-      cat deployments/configs/cert-issuer.yaml | sed "s/EMAIL/${_EMAIL_ID_}/g" | sed "s/DOMAIN/${_DOMAIN_}/g" | kubectl apply -n esignet -f -
+      cat deployments/configs/cert-issuer.yaml | sed "s/EMAIL/${_EMAIL_ID_}/g" | sed "s/DOMAIN/${_DOMAIN_}/g" | kubectl apply -n cert-manager -f -
   waitFor:
     - 'install-certs-manager'
 
