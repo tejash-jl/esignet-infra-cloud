@@ -13,14 +13,7 @@ enable_insecure: false
 istio:
   enabled: true
   gateways:
-    - name: esignet/esignet-gateway
-      protocol: HTTPS
-      port: 443
-      tls:
-        mode: SIMPLE
-        credentialName: dev-com-tls
-      hosts:
-        - DOMAIN
+    - esignet/esignet-gateway
   prefix: /v1/esignet/
 
 serviceMonitor:
