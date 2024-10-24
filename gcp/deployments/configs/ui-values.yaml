@@ -11,8 +11,17 @@ istio:
       protocol: HTTP
       portName: http
       port: 80
-  hosts:
-    - DOMAIN
+      hosts:
+        - DOMAIN
+    - name: esignet-gateway
+      protocol: HTTPS
+      portName: https
+      port: 443
+      tls:
+        mode: SIMPLE
+        credentialName: dev-com-tls
+      hosts:
+        - DOMAIN
   prefix: /
 
 serviceMonitor:
