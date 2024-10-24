@@ -14,7 +14,7 @@ extraEnvVars:
 
 ## Disable ingress as we use Istio
 ingress:
-  enabled: true
+  enabled: false
   hostname:
   path: "/auth"
   annotations:
