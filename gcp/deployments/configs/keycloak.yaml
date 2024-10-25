@@ -29,9 +29,8 @@ istio:
   gateway:
     enabled: true
     name: "esignet-gateway"
-    tls:
-      enabled: true
-      certManagerIssuer: letsencrypt-production
+  tls:
+    enabled: true
   prefix: "/auth"
 
 proxyAddressForwarding: true
