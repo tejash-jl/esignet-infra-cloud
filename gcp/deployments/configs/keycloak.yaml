@@ -28,10 +28,10 @@ istio:
   enabled: true
   gateway:
     enabled: true
-    name: "esignet-gateway"
-  tls:
-    enabled: true
-  prefix: "/auth"
+    name: esignet-gateway
+    tls:
+      enabled: true
+  prefix: /auth
 
 proxyAddressForwarding: true
 
