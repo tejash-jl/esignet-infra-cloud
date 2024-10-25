@@ -32,7 +32,7 @@ istio:
     tls:
       enabled: true
       certManagerIssuer: letsencrypt-production
-    path: "/auth"
+  prefix: "/auth"
 
 proxyAddressForwarding: true
 
