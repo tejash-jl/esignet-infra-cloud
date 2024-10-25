@@ -24,6 +24,12 @@ ingress:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   tls: true
 
+istio:
+  enabled: true
+  gateways:
+    - esignet/esignet-gateway
+  prefix: /auth
+
 proxyAddressForwarding: true
 
 replicaCount: 1
