@@ -26,9 +26,13 @@ ingress:
 
 istio:
   enabled: true
-  gateways:
-    - esignet/esignet-gateway
-  prefix: /auth
+  gateway:
+    enabled: true
+    name: "esignet-gateway"
+    tls:
+      enabled: true
+      certManagerIssuer: letsencrypt-production
+    path: "/auth"
 
 proxyAddressForwarding: true
 
