@@ -145,19 +145,19 @@ steps:
       sqlPass=$(gcloud secrets versions access latest --secret ${_SECRET_NAME_}) &&
       sed -i -E "s/DOMAIN/${_DOMAIN_}/g" deployments/configs/keycloak.yaml
       cat deployments/configs/keycloak-virtualservice.yaml | sed 's/DOMAIN/${_DOMAIN_}/' | kubectl apply -n esignet -f -
-      #yq e -i '.image.repository="mosipid/mosip-keycloak"|.image.tag="16.1.1-debian-10-r85"' deployments/configs/keycloak.yaml
-      #keycloak_docker_image=$(yq e '.image.repository' deployments/configs/keycloak.yaml) 
-      #keycloak_docker_version=$(yq e '.image.tag' deployments/configs/keycloak.yaml)
+      yq e -i '.image.repository="mosipid/mosip-keycloak"|.image.tag="16.1.1-debian-10-r85"' deployments/configs/keycloak.yaml
+      keycloak_docker_image=$(yq e '.image.repository' deployments/configs/keycloak.yaml) 
+      keycloak_docker_version=$(yq e '.image.tag' deployments/configs/keycloak.yaml)
       helm install keycloak mosip/keycloak -n esignet --create-namespace --version $keycloak_helm_version -f deployments/configs/keycloak.yaml --set externalDatabase.host=$sqlIP --set externalDatabase.password=$sqlPass --set image.repository=$keycloak_docker_image --set image.tag=$keycloak_docker_version --wait
       kubectl create secret -n esignet generic postgres --from-literal=password="$sqlPass" &&
       helm -n esignet install postgres-init mosip/postgres-init -f deployments/configs/db_init.yaml --version $postgres_init_helm_version --set databases.mosip_esignet.host=$sqlIP --set image.repository=$postgres_init_docker_image --set image.tag=$postgres_init_docker_version --wait
       sh deployments/scripts/config-init.sh ${_DOMAIN_} ${_DB_NAME_} ${_SECRET_NAME_} ${_REDIS_NAME_} ${_REGION_} ${_ENABLE_MOCK_}
       sed -i -E "s/DOMAIN/${_DOMAIN_}/g" deployments/configs/esignet-values.yaml
-      yq e -i '.image.repository=" mosipid/esignet"|.image.tag="1.4.1"' deployments/configs/esignet-values.yaml
-      esignet_docker_image=$(yq e '.image.repository' deployments/configs/esignet-values.yaml) 
-      esignet_docker_version=$(yq e '.image.tag' deployments/configs/esignet-values.yaml)
-      echo "$esignet_docker_image"
-      echo "$esignet_docker_version"
+      #yq e -i '.image.repository=" mosipid/esignet"|.image.tag="1.4.1"' deployments/configs/esignet-values.yaml
+      #esignet_docker_image=$(yq e '.image.repository' deployments/configs/esignet-values.yaml) 
+      #esignet_docker_version=$(yq e '.image.tag' deployments/configs/esignet-values.yaml)
+      #echo "$esignet_docker_image"
+      #echo "$esignet_docker_version"
       helm -n esignet template esignet mosip/esignet --version $esignet_helm_version -f deployments/configs/esignet-values.yaml --set image.repository=$esignet_docker_image --set image.tag=$esignet_docker_version > deploy.yaml
       yq  e -i 'select(di == 3).spec.template.spec.volumes += [{"name":"esignet-properties","configMap":{"name":"esignet-local-properties"}}]' deploy.yaml
       yq e -i 'select(di == 3).spec.template.spec.containers[0] += {"volumeMounts":[{"mountPath":"/home/mosip/esignet-local.properties","name":"esignet-properties","subPath":"esignet-local.properties"}]}' deploy.yaml
