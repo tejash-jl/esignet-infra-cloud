@@ -34,5 +34,5 @@ oidc_ui:
       SIGN_IN_WITH_ESIGNET_PLUGIN_URL: 'http://artifactory.esignet:80/artifactory/libs-release-local/mosip-plugins/sign-in-with-esignet.zip'
 
 image:
-  repository: "mosipid/oidc-ui"
-  tag: "1.4.1"
+  repository: 'mosipid/oidc-ui'
+  tag: '1.4.1'
