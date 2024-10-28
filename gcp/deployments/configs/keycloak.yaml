@@ -30,13 +30,28 @@ istio:
     enabled: true
     name: esignet-gateway
     protocol: HTTP
-      portName: http
-      port: 80
-      hosts:
-        - DOMAIN
+    portName: http
+    port: 80
+    hosts:
+      - DOMAIN
     tls:
       enabled: true
-  prefix: "/auth"    
+  prefix: "/auth"
+  virtualService:
+    enabled: true
+    name: keycloak-virtualservice
+    gateway: esignet-gateway
+    hosts:
+    - DOMAIN
+    http:
+      - match:
+          - uri:
+              prefix: /auth
+        route:
+          - destination:
+              host: keycloak
+              port:
+                number: 80   
 
 proxyAddressForwarding: true
 
