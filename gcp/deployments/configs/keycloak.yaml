@@ -29,9 +29,14 @@ istio:
   gateway:
     enabled: true
     name: esignet-gateway
+    protocol: HTTP
+      portName: http
+      port: 80
+      hosts:
+        - DOMAIN
     tls:
       enabled: true
-  prefix: /auth
+  prefix: "/auth"    
 
 proxyAddressForwarding: true
 
