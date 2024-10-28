@@ -39,19 +39,8 @@ istio:
   prefix: "/auth"
   virtualService:
     enabled: true
-    name: keycloak-virtualservice
-    gateway: esignet-gateway
-    hosts:
-    - DOMAIN
-    http:
-      - match:
-          - uri:
-              prefix: /auth
-        route:
-          - destination:
-              host: keycloak
-              port:
-                number: 80   
+    name: keycloak
+    gateway: esignet-gateway  
 
 proxyAddressForwarding: true
 
