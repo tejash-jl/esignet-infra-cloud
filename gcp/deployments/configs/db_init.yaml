@@ -68,3 +68,7 @@ databases:
 
   mosip_mockidentitysystem:
     enabled: false
+  
+  image:
+    repository: "mosipid/postgres-init"
+    tag: "1.2.0.1"
