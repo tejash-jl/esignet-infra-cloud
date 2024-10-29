@@ -13,7 +13,7 @@ extraEnvVars:
 enable_insecure: false
 
 istio:
-  enabled: true
+  enabled: false
 
 serviceMonitor:
   enabled: false
