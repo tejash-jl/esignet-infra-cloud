@@ -60,6 +60,7 @@ steps:
   args:
     - -c
     - |
+      kubectl apply --validate=false -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.1/cert-manager.crds.yaml
       helm install cert-manager jetstack/cert-manager --version v1.14.1 -n cert-manager --create-namespace --set crds.enabled=true
   waitFor:
     - 'helm-cert-manager-repo'
@@ -169,6 +170,10 @@ steps:
       echo $oidcui_docker_image
       helm -n esignet install oidc-ui mosip/oidc-ui -f deployments/configs/ui-values.yaml --version $oidcui_helm_version --set image.repository=$oidcui_docker_image --set image.tag=$oidcui_docker_version --wait
       cat deployments/configs/gateway.yaml | sed 's/DOMAIN/${_DOMAIN_}/' | kubectl apply -n esignet -f -
+      keycloak_init_docker_image=$(yq eval '.image.repository' deployments/configs/keycloak-init.yaml)
+      keycloak_init_docker_version=$(yq eval '.image.tag' deployments/configs/keycloak-init.yaml)
+      echo $keycloak_init_docker_version
+      echo $keycloak_init_docker_image
       kubectl create configmap keycloak-host --from-literal=keycloak-internal-service-url=http://keycloak.esignet.svc.cluster.local:80/auth/ -n esignet &&
       helm -n esignet install keycloak-init mosip/keycloak-init --set frontend=https://${_DOMAIN_}/auth --version $keycloak_init_helm_version --set image.repository=$keycloak_init_docker_image --set image.tag=$keycloak_init_docker_version
       set +a
@@ -188,6 +193,10 @@ steps:
         apt-get update
         apt-get install wget -y
         wget https://github.com/mikefarah/yq/releases/download/v4.44.2/yq_linux_amd64.tar.gz -O - | tar xz && mv yq_linux_amd64 /usr/bin/yq
+        mock_ida_docker_image=$(yq eval '.image.repository' deployments/configs/mock-identity-values.yaml)
+        mock_ida_docker_version=$(yq eval '.image.tag' deployments/configs/mock-identity-values.yaml)
+        echo $mock_ida_docker_image
+        echo $mock_ida_docker_version
         helm  -n esignet template mock-identity-system mosip/mock-identity-system --version $mock_ida_helm_version -f deployments/configs/mock-identity-values.yaml --set image.repository=$mock_ida_docker_image --set image.tag=$mock_ida_docker_version > deploy.yaml
         yq  e -i 'select(di == 3).spec.template.spec.volumes += [{"name":"mock-identity-properties","configMap":{"name":"mock-identity-properties"}}]' deploy.yaml
         yq e -i 'select(di == 3).spec.template.spec.containers[0] += {"volumeMounts":[{"mountPath":"/home/mosip/mock-identity-system-default.properties","name":"mock-identity-properties","subPath":"mock-identity-system-default.properties"}]}' deploy.yaml

@@ -24,3 +24,7 @@ metrics:
 extraEnvVarsCM:
   - artifactory-share
   - softhsm-share
+
+image:
+  repository: "mosipid/mock-identity-system"
+  tag: "0.9.3"
