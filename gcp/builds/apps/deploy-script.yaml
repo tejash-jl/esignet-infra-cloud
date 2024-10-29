@@ -131,7 +131,7 @@ steps:
       cat deployments/configs/certificate.yaml | sed 's/DOMAIN/${_DOMAIN_}/' | kubectl apply -n istio-system -f -
       helm repo add mosip $mosip_repo
       helm install softhsm mosip/softhsm -n esignet --create-namespace -f deployments/configs/softhsm.yaml --version "$softhsm_helm_version" --wait
-      #yq e -i '.image.repository="mosipid/artifactory-server"|.image.tag="1.4.1-ES"' deployments/configs/artifactory.yaml
+      yq e -i '.image.repository="mosipid/artifactory-server"|.image.tag="1.4.1-ES"' deployments/configs/artifactory.yaml
       artifactory_docker_image=$(yq e '.image.repository' deployments/configs/artifactory.yaml) 
       artifactory_docker_version=$(yq e '.image.tag' deployments/configs/artifactory.yaml)
       helm install artifactory mosip/artifactory -n esignet --create-namespace --set image.repository=$artifactory_docker_image --set image.tag=$artifactory_docker_version --version $artifactory_helm_version --wait      
