@@ -244,6 +244,21 @@ psql "sslmode=require hostaddr=PRIVATE_IP user=postgres dbname=postgres"
  echo Password: $(kubectl get secret --namespace esignet keycloak -o jsonpath="{.data.admin-password}" | base64 --decode)
 ```
 
+### Steps to connect to redis
+- Run the below command to install redis-cli
+```bash
+   sudo apt update
+   sudo apt install redis-tools
+   redis-cli --version
+```
+- Run the below command to get the ip of the Redis instance
+```bash
+ gcloud redis instances describe esignet-dev-redis --region=asia-south1
+```
+- Connect to the redis
+```bash
+redis-cli -h IP_ADDRESS
+```
 ### DEMO
 
 The postman collection (along with env config) has been provided in `postman_collections` directory. 
