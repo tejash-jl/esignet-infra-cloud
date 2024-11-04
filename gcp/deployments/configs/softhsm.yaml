@@ -5,3 +5,7 @@ resources:
   requests:
     cpu: 100m
     memory: 20Mi
+
+image:
+  repository: "mosipid/softhsm"
+  tag: "v2"
