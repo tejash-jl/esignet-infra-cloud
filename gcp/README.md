@@ -24,6 +24,26 @@ This project leverages a cloud-native, microservices-based architecture, primari
 
 
 ### Deployment Approach
+This project leverages a cloud-native, microservices-based architecture, primarily using Google Kubernetes Engine (GKE) to orchestrate and manage containerized applications.
+
+### Overview
+
+- **Kubernetes (GKE)** - Google Kubernetes Engine (GKE) is used as the core platform for container orchestration.
+    
+- **Artifactory Service** - Artifactory acts as a repository manager, handling storage, distribution, and versioning of build artifacts, such as Docker images and libraries.
+    
+- **Keycloak** - Keycloak provides identity and access management, allowing for centralized authentication and authorization.
+    
+- **OIDC (OpenID Connect)** - OIDC is used for user authentication across services, ensuring secure communication between microservices and enabling Single Sign-On (SSO) functionality.
+    
+- **Softhsm** - Softhsm is utilized for secure key storage and cryptographic operations.
+    
+- **Esignet Service** - Esignet is the central service responsible for handling digital signatures and cryptographic operations.
+    
+- **Source Repository and Cloud Build** - Each commit triggers an automated build process that compiles, tests, and deploys the code to the GKE cluster.
+
+
+### Deployment Approach
 
 Deployment uses the following tools:
 
@@ -54,14 +74,30 @@ Currently, the below release version of the Helm charts will be deployed. The ve
  
  **.env**
   - helm chart values which includes Docker Image,chart version,Docker Version, repository can be passed into the .env file and can be called dynamically while deploying.
+ 
+ **.env**
+  - helm chart values which includes Docker Image,chart version,Docker Version, repository can be passed into the .env file and can be called dynamically while deploying.
 
 ### Pre-requisites
 
+- #### [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install)
 - #### [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install)
 
 
 - #### [Run gcloud commands with Cloud Shell](https://cloud.google.com/shell/docs/run-gcloud-commands)
 
+- #### **Install kubectl**
+
+  Link: https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl#apt
+
+  Follow the steps mentioned in the above link to install Kubectl.
+
+
+- #### **Install Helm**
+
+  Link: https://helm.sh/docs/intro/install/
+  
+  Follow the steps mentioned in the above link to install helm.
 - #### **Install kubectl**
 
   Link: https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl#apt
@@ -99,10 +135,12 @@ Currently, the below release version of the Helm charts will be deployed. The ve
                     - Actual values for the variable template defined in **variables.tf** to be passed to **pre-config.tf**
 
 
+
 ### Infrastructure Deployment
 
 ![deploy-approach](assets/deploy-approach.png)
 
+#### Step-by-Step guide
 #### Step-by-Step guide
 
 #### Setup CLI environment variables
@@ -121,6 +159,12 @@ ENABLE_MOCK=false # to enable deployment of mock ida
 alias k=kubectl
 ```
 
+#### **script to setup authentication, configuring the project, enabling services, and creating a service account in GCP**:
+```
+script file located at `deployment/scripts/setup_gcp.sh` 
+
+**To execute the script**
+bash setup_gcp.sh
 #### **script to setup authentication, configuring the project, enabling services, and creating a service account in GCP**:
 ```
 script file located at `deployment/scripts/setup_gcp.sh` 
@@ -156,6 +200,7 @@ _SERVICE_ACCOUNT_=$SERVICE_ACCOUNT,_LOG_BUCKET_=$PROJECT_ID-esignet-state
 # Remove/Destroy infrastructure
 /*
 gcloud builds submit --config="./builds/infra/destroy-script.yaml" \
+--project=$PROJECT_ID --substitutions=_PROJECT_ID_=$PROJECT_ID,\
 --project=$PROJECT_ID --substitutions=_PROJECT_ID_=$PROJECT_ID,\
 _SERVICE_ACCOUNT_=$SERVICE_ACCOUNT,_LOG_BUCKET_=$PROJECT_ID-esignet-state
 */
@@ -287,6 +332,14 @@ Open postman and import both the collection and environment collections
   
 - If the request returns 200 Success code then library will store a global variable called '''**pmlib_code**'''
 
+- To Setup Global library **pmlib_code**
+
+- Download the postman-util-lib from ```https://joolfe.github.io/postman-util-lib/#postman-collection``` and proceed following the steps mentioned in the Automatic Setup.
+  
+- Import the collection into your Postman App and execute GET request called 'Lib Install'.
+  
+- If the request returns 200 Success code then library will store a global variable called '''**pmlib_code**'''
+
 ## Steps to enable connection to MOSIP IDA
 
 - Onboard your esignet instance as a provider in MOSIP IDA by connecting with MOSIP team.
@@ -304,3 +357,4 @@ After modifying the configmap, restart the esignet service.
 ```bash
 kubectl rollout restart deploy esignet -n esignet
 ```
+

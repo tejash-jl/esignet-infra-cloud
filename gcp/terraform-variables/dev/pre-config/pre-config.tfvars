@@ -132,6 +132,10 @@ dbInfo = [
   {
     name         = "mosip_mockidentitysystem"
     instanceName = "esignet-dev-pgsql"
+  },
+  {
+    name         = "mosip_mockidentitysystem"
+    instanceName = "esignet-dev-pgsql"
   }
 ]
 
