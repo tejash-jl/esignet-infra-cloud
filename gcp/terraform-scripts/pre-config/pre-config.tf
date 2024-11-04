@@ -117,7 +117,7 @@ resource "google_compute_global_address" "private_ip_block" {
   name          = var.sql_ip_name
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
-  prefix_length = 16
+  prefix_length = 22
   network       = google_compute_network.vpc.id
   project       = var.project_id
   depends_on = [google_compute_subnetwork.gke_subnet]

@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: esignet-cert
+  namespace: istio-system  # namespace where Istio is installed
+spec:
+  secretName: esignet-cert-tls
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  commonName: DOMAIN
+  dnsNames:
+    - DOMAIN

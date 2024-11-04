@@ -14,7 +14,7 @@ extraEnvVars:
 
 ## Disable ingress as we use Istio
 ingress:
-  enabled: true
+  enabled: false
   hostname:
   path: "/auth"
   annotations:
@@ -23,6 +23,24 @@ ingress:
     cert-manager.io/issuer: letsencrypt
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   tls: true
+
+istio:
+  enabled: true
+  gateway:
+    enabled: true
+    name: esignet-gateway
+    protocol: HTTP
+    portName: http
+    port: 80
+    hosts:
+      - DOMAIN
+    tls:
+      enabled: true
+  prefix: "/auth"
+  virtualService:
+    enabled: true
+    name: keycloak
+    gateway: esignet-gateway  
 
 proxyAddressForwarding: true
 
@@ -58,3 +76,8 @@ externalDatabase:
   user: registry
   database: esignet-keycloak
   password: "CKHAzX1NoBg_m8As"
+
+image:
+  repository: "mosipid/mosip-keycloak"
+  tag: "16.1.1-debian-10-r85"
+

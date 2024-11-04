@@ -11,7 +11,10 @@ extraEnvVars:
 enable_insecure: false
 
 istio:
-  enabled: false
+  enabled: true
+  gateways:
+    - esignet/esignet-gateway
+  prefix: /v1/esignet/
 
 serviceMonitor:
   enabled: false
@@ -22,3 +25,7 @@ metrics:
 extraEnvVarsCM:
   - artifactory-share
   - softhsm-share
+
+image:
+  repository: "mosipid/esignet"
+  tag: "1.4.1"

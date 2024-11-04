@@ -3,7 +3,18 @@ extraEnvVars:
 enable_insecure: false
 
 istio:
-  enabled: false
+  enabled: true
+  ingressController:
+    name: ingressgateway
+  gateways:
+    - name: esignet-gateway
+      protocol: HTTP
+      portName: http
+      port: 80
+      hosts:
+        - DOMAIN
+  prefix: /
+ 
 
 serviceMonitor:
   enabled: false
@@ -21,3 +32,7 @@ oidc_ui:
     oidc-ui:
       REACT_APP_SBI_DOMAIN_URI: 'http://esignet.esignet'
       SIGN_IN_WITH_ESIGNET_PLUGIN_URL: 'http://artifactory.esignet:80/artifactory/libs-release-local/mosip-plugins/sign-in-with-esignet.zip'
+
+image:
+  repository: "mosipid/oidc-ui"
+  tag: "1.4.1"

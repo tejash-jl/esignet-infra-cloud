@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: mock-identity
+  namespace: esignet
+spec:
+  hosts:
+    - DOMAIN
+  gateways:
+    - esignet-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /v1/mock-identity-system
+      route:
+        - destination:
+            host: mock-identity-system
+            port:
+              number: 80
