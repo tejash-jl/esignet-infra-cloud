@@ -1,6 +1,6 @@
 ﻿# eSignet, one-click deployment on GCP
 
-![esignet-infra](assets/esignet_architecture.png)
+![esignet-infra](assets/esignet-architecture.png)
 
 ## Introduction
 
