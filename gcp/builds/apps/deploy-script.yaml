@@ -130,7 +130,7 @@ steps:
       echo "Istio ingress gateway patched with Load Balancer IP"
       cat deployments/configs/certificate.yaml | sed 's/DOMAIN/${_DOMAIN_}/' | kubectl apply -n istio-system -f -
       helm repo add mosip $mosip_repo
-       if [ -n "${softhsm_docker_image}" ]; then
+      if [ -n "${softhsm_docker_image}" ]; then
         yq e -i '.image.repository="'${softhsm_docker_image}'"' softhsm.yaml
       fi
       if [ -n "${softhsm_docker_version}" ]; then
