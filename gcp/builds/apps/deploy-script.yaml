@@ -9,7 +9,7 @@ steps:
   args:
     - -c
     - |
-      kubectl create clusterrolebinding cluster-admin-binding --clusterrole cluster-admin --user $(gcloud config get-value account)
+      kubectl create clusterrolebinding cluster-admin-binding1 --clusterrole cluster-admin --user $(gcloud config get-value account)
   waitFor:
     - 'get-credentials'
 
