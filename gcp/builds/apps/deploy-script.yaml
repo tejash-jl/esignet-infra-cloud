@@ -70,7 +70,7 @@ steps:
     - -c
     - |
       kubectl create ns esignet &&
-      cat deployments/configs/clusterissuer.yaml | sed "s/EMAIL/${_EMAIL_ID_}/g" | kubectl apply -f -
+      cat gcp/deployments/configs/clusterissuer.yaml | sed "s/EMAIL/${_EMAIL_ID_}/g" | kubectl apply -f -
   waitFor:
     - 'install-certs-manager'
 
