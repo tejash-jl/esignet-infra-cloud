@@ -107,7 +107,7 @@ steps:
 - name: 'gcr.io/${_PROJECT_ID_}/helm:3.12.0'
   id: 'helm-kafka-ui-install'
   entrypoint: 'helm'
-  args: ['install', 'kafka-ui', 'kafka-ui/kafka-ui', '-n', 'kafka', '-f', 'gcp/deployments/configs/kafka-ui-values.yaml']
+  args: ['install', 'kafka-ui', 'kafka-ui/kafka-ui', '-n', 'kafka', '-f', 'deployments/configs/kafka-ui-values.yaml']
   waitFor:
     - 'helm-kafka-install'
 
@@ -132,7 +132,7 @@ steps:
       apt-get update
       apt-get install jq wget -y &&
       wget https://github.com/mikefarah/yq/releases/download/v4.44.2/yq_linux_amd64.tar.gz -O - | tar xz && mv yq_linux_amd64 /usr/bin/yq
-      export $(grep -v '^#' gcp/.env | xargs -d '\n')
+      export $(grep -v '^#' .env | xargs -d '\n')
       echo "$mosip_repo"
       loadbalancerip=$(gcloud compute addresses describe "${_LB_NAME_}" --region "${_REGION_}" --format json | jq -r ".address")
       echo "Load Balancer IP: $loadbalancerip"
