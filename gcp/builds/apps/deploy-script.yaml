@@ -123,7 +123,11 @@ steps:
       apt-get update
       apt-get install jq wget -y &&
       wget https://github.com/mikefarah/yq/releases/download/v4.44.2/yq_linux_amd64.tar.gz -O - | tar xz && mv yq_linux_amd64 /usr/bin/yq
-      export $(grep -v '^#' gcp/.env | xargs -d '\n')
+      #export $(grep -v '^#' gcp/.env | xargs -d '\n')
+      set -o allexport
+      source gcp/.env
+      set +o allexport
+      echo "$mosip_repo"
       loadbalancerip=$(gcloud compute addresses describe "${_LB_NAME_}" --region "${_REGION_}" --format json | jq -r ".address")
       echo "Load Balancer IP: $loadbalancerip"
       kubectl patch svc istio-ingressgateway --namespace istio-system --patch "{\"spec\": { \"loadBalancerIP\": \"$loadbalancerip\" }}"
@@ -203,8 +207,8 @@ steps:
       if [[ ${_ENABLE_MOCK_} == "true" ]]
       then
         set -a
-        export $(xargs < .env)
-        sh deployments/scripts/mock-config-init.sh ${_DB_NAME_} ${_SECRET_NAME_}
+        export $(xargs < gcp/.env)
+        sh gcp/deployments/scripts/mock-config-init.sh ${_DB_NAME_} ${_SECRET_NAME_}
         apt-get update
         apt-get install wget -y
         wget https://github.com/mikefarah/yq/releases/download/v4.44.2/yq_linux_amd64.tar.gz -O - | tar xz && mv yq_linux_amd64 /usr/bin/yq
