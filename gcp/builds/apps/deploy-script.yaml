@@ -164,7 +164,7 @@ steps:
         yq e -i '.image.tag="'${postgres_init_docker_version}'"' gcp/deployments/configs/db_init.yaml
       fi
       helm install postgres-init mosip/postgres-init -n esignet --create-namespace -f gcp/deployments/configs/db_init.yaml --version "$postgres_init_helm_version" --set databases.mosip_esignet.host=$sqlIP  --wait     
-      sh deployments/scripts/config-init.sh ${_DOMAIN_} ${_DB_NAME_} ${_SECRET_NAME_} ${_REDIS_NAME_} ${_REGION_} ${_ENABLE_MOCK_}      
+      sh gcp/deployments/scripts/config-init.sh ${_DOMAIN_} ${_DB_NAME_} ${_SECRET_NAME_} ${_REDIS_NAME_} ${_REGION_} ${_ENABLE_MOCK_}      
       if [ -n "${esignet_docker_image}" ]; then
         yq e -i '.image.repository="'${esignet_docker_image}'"' gcp/deployments/configs/esignet-values.yaml
       fi
