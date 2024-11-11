@@ -123,7 +123,7 @@ steps:
       apt-get update
       apt-get install jq wget -y &&
       wget https://github.com/mikefarah/yq/releases/download/v4.44.2/yq_linux_amd64.tar.gz -O - | tar xz && mv yq_linux_amd64 /usr/bin/yq
-      export $(grep -v '^#' .env | xargs -d '\n')
+      export $(grep -v '^#' gcp/.env | xargs -d '\n')
       loadbalancerip=$(gcloud compute addresses describe "${_LB_NAME_}" --region "${_REGION_}" --format json | jq -r ".address")
       echo "Load Balancer IP: $loadbalancerip"
       kubectl patch svc istio-ingressgateway --namespace istio-system --patch "{\"spec\": { \"loadBalancerIP\": \"$loadbalancerip\" }}"
@@ -209,7 +209,7 @@ steps:
         apt-get install wget -y
         wget https://github.com/mikefarah/yq/releases/download/v4.44.2/yq_linux_amd64.tar.gz -O - | tar xz && mv yq_linux_amd64 /usr/bin/yq
         if [ -n "${mock_ida_docker_image}" ]; then
-           yq e -i '.image.repository="'${mock_ida_docker_image}'"' deployments/configs/mock-identity-values.yaml
+           yq e -i '.image.repository="'${mock_ida_docker_image}'"' gcp/deployments/configs/mock-identity-values.yaml
         fi
         if [ -n "${mock_ida_docker_version}" ]; then
            yq e -i '.image.tag="'${mock_ida_docker_version}'"' gcp/deployments/configs/mock-identity-values.yaml
