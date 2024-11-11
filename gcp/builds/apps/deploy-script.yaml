@@ -58,8 +58,17 @@ steps:
   args:
     - -c
     - |
-      kubectl apply --validate=false -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.1/cert-manager.crds.yaml
-      #helm install cert-manager jetstack/cert-manager --version v1.14.1 -n cert-manager --create-namespace --set crds.enabled=true
+      if ! kubectl get crds | grep -q 'certificates.cert-manager.io'; then
+        echo "Cert-Manager is not installed. Proceeding with installation."
+
+        # Apply Cert-Manager CRDs
+        kubectl apply --validate=false -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.1/cert-manager.crds.yaml
+
+        # Install Cert-Manager via Helm
+        helm install cert-manager jetstack/cert-manager --version v1.14.1 -n cert-manager --create-namespace --set crds.enabled=true
+      else
+        echo "Cert-Manager is already installed. Skipping installation."
+      fi
   waitFor:
     - 'helm-cert-manager-repo'
 
@@ -70,7 +79,7 @@ steps:
     - -c
     - |
       kubectl create ns esignet &&
-      cat gcp/deployments/configs/clusterissuer.yaml | sed "s/EMAIL/${_EMAIL_ID_}/g" | kubectl apply -f -
+      cat deployments/configs/clusterissuer.yaml | sed "s/EMAIL/${_EMAIL_ID_}/g" | kubectl apply -f -
   waitFor:
     - 'install-certs-manager'
 
@@ -108,7 +117,7 @@ steps:
   args:
     - -c
     - |
-      kubectl apply -f gcp/deployments/configs/kafka.yml -n kafka
+      kubectl apply -f deployments/configs/kafka.yml -n kafka
   waitFor:
     - 'helm-kafka-ui-install'
 
@@ -129,66 +138,66 @@ steps:
       echo "Load Balancer IP: $loadbalancerip"
       kubectl patch svc istio-ingressgateway --namespace istio-system --patch "{\"spec\": { \"loadBalancerIP\": \"$loadbalancerip\" }}"
       echo "Istio ingress gateway patched with Load Balancer IP"
-      cat gcp/deployments/configs/certificate.yaml | sed 's/DOMAIN/${_DOMAIN_}/' | kubectl apply -n istio-system -f -
+      cat deployments/configs/certificate.yaml | sed 's/DOMAIN/${_DOMAIN_}/' | kubectl apply -n istio-system -f -
       helm repo add mosip https://mosip.github.io/mosip-helm
       if [ -n "${softhsm_docker_image}" ]; then
-        yq e -i '.image.repository="'${softhsm_docker_image}'"' gcp/deployments/configs/softhsm.yaml
+        yq e -i '.image.repository="'${softhsm_docker_image}'"' deployments/configs/softhsm.yaml
       fi
       if [ -n "${softhsm_docker_version}" ]; then
-        yq e -i '.image.tag="'${softhsm_docker_version}'"' gcp/deployments/configs/softhsm.yaml
+        yq e -i '.image.tag="'${softhsm_docker_version}'"' deployments/configs/softhsm.yaml
       fi
-      helm install softhsm mosip/softhsm -n esignet --create-namespace -f gcp/deployments/configs/softhsm.yaml --version "$softhsm_helm_version" --wait
+      helm install softhsm mosip/softhsm -n esignet --create-namespace -f deployments/configs/softhsm.yaml --version "$softhsm_helm_version" --wait
       if [ -n "${artifactory_docker_image}" ]; then
-         yq e -i '.image.repository="'${artifactory_docker_image}'"' gcp/deployments/configs/artifactory.yaml
+         yq e -i '.image.repository="'${artifactory_docker_image}'"' deployments/configs/artifactory.yaml
       fi
       if [ -n "${artifactory_docker_version}" ]; then
-        yq e -i '.image.tag="'${artifactory_docker_version}'"' gcp/deployments/configs/artifactory.yaml
+        yq e -i '.image.tag="'${artifactory_docker_version}'"' deployments/configs/artifactory.yaml
       fi
-      helm install artifactory mosip/artifactory -n esignet --create-namespace -f gcp/deployments/configs/artifactory.yaml --version $artifactory_helm_version --wait      
+      helm install artifactory mosip/artifactory -n esignet --create-namespace -f deployments/configs/artifactory.yaml --version $artifactory_helm_version --wait      
       sqlIP=$(gcloud sql instances describe ${_DB_NAME_} --format=json  | jq -r ".ipAddresses[0].ipAddress") &&
       sqlPass=$(gcloud secrets versions access latest --secret ${_SECRET_NAME_}) &&
-      yq eval '.istio.gateway.hosts[] |= sub("DOMAIN", strenv(_DOMAIN_))' -i gcp/deployments/configs/keycloak.yaml
-      cat gcp/deployments/configs/keycloak-virtualservice.yaml | sed 's/DOMAIN/${_DOMAIN_}/' | kubectl apply -n esignet -f -
+      yq eval '.istio.gateway.hosts[] |= sub("DOMAIN", strenv(_DOMAIN_))' -i deployments/configs/keycloak.yaml
+      cat deployments/configs/keycloak-virtualservice.yaml | sed 's/DOMAIN/${_DOMAIN_}/' | kubectl apply -n esignet -f -
       if [ -n "${keycloak_docker_image}" ]; then
-        yq e -i '.image.repository="'${keycloak_docker_image}'"' gcp/deployments/configs/keycloak.yaml
+        yq e -i '.image.repository="'${keycloak_docker_image}'"' deployments/configs/keycloak.yaml
       fi
       if [ -n "${keycloak_docker_version}" ]; then
-        yq e -i '.image.tag="'${keycloak_docker_version}'"' gcp/deployments/configs/keycloak.yaml
+        yq e -i '.image.tag="'${keycloak_docker_version}'"' deployments/configs/keycloak.yaml
       fi
-      helm install keycloak mosip/keycloak -n esignet --create-namespace -f gcp/deployments/configs/keycloak.yaml --version "$keycloak_helm_version" --set externalDatabase.host=$sqlIP --set externalDatabase.password=$sqlPass --wait
+      helm install keycloak mosip/keycloak -n esignet --create-namespace -f deployments/configs/keycloak.yaml --version "$keycloak_helm_version" --set externalDatabase.host=$sqlIP --set externalDatabase.password=$sqlPass --wait
       kubectl create secret -n esignet generic postgres --from-literal=password="$sqlPass" &&
       if [ -n "${postgres_init_docker_image}" ]; then
-        yq e -i '.image.repository="'${postgres_init_docker_image}'"' gcp/deployments/configs/db_init.yaml
+        yq e -i '.image.repository="'${postgres_init_docker_image}'"' deployments/configs/db_init.yaml
       fi
       if [ -n "${postgres_init_docker_version}" ]; then
-        yq e -i '.image.tag="'${postgres_init_docker_version}'"' gcp/deployments/configs/db_init.yaml
+        yq e -i '.image.tag="'${postgres_init_docker_version}'"' deployments/configs/db_init.yaml
       fi
-      helm install postgres-init mosip/postgres-init -n esignet --create-namespace -f gcp/deployments/configs/db_init.yaml --version "$postgres_init_helm_version" --set databases.mosip_esignet.host=$sqlIP  --wait     
-      sh gcp/deployments/scripts/config-init.sh ${_DOMAIN_} ${_DB_NAME_} ${_SECRET_NAME_} ${_REDIS_NAME_} ${_REGION_} ${_ENABLE_MOCK_}      
+      helm install postgres-init mosip/postgres-init -n esignet --create-namespace -f deployments/configs/db_init.yaml --version "$postgres_init_helm_version" --set databases.mosip_esignet.host=$sqlIP  --wait     
+      sh deployments/scripts/config-init.sh ${_DOMAIN_} ${_DB_NAME_} ${_SECRET_NAME_} ${_REDIS_NAME_} ${_REGION_} ${_ENABLE_MOCK_}      
       if [ -n "${esignet_docker_image}" ]; then
-        yq e -i '.image.repository="'${esignet_docker_image}'"' gcp/deployments/configs/esignet-values.yaml
+        yq e -i '.image.repository="'${esignet_docker_image}'"' deployments/configs/esignet-values.yaml
       fi
       if [ -n "${esignet_docker_version}" ]; then
-        yq e -i '.image.tag="'${esignet_docker_version}'"' gcp/deployments/configs/esignet-values.yaml
+        yq e -i '.image.tag="'${esignet_docker_version}'"' deployments/configs/esignet-values.yaml
       fi
-      helm  -n esignet template esignet mosip/esignet -f gcp/deployments/configs/esignet-values.yaml --version "$esignet_helm_version" > deploy.yaml    
+      helm  -n esignet template esignet mosip/esignet -f deployments/configs/esignet-values.yaml --version "$esignet_helm_version" > deploy.yaml    
       yq  e -i 'select(di == 3).spec.template.spec.volumes += [{"name":"esignet-properties","configMap":{"name":"esignet-local-properties"}}]' deploy.yaml
       yq e -i 'select(di == 3).spec.template.spec.containers[0] += {"volumeMounts":[{"mountPath":"/home/mosip/esignet-local.properties","name":"esignet-properties","subPath":"esignet-local.properties"}]}' deploy.yaml
       kubectl apply -f deploy.yaml -n esignet
-      yq eval '.istio.gateway.hosts[] |= sub("DOMAIN", strenv(_DOMAIN_))' -i gcp/deployments/configs/ui-values.yaml
+      yq eval '.istio.gateway.hosts[] |= sub("DOMAIN", strenv(_DOMAIN_))' -i deployments/configs/ui-values.yaml
       if [ -n "${oidcui_docker_image}" ]; then
-        yq e -i '.image.repository="'${oidcui_docker_image}'"' gcp/deployments/configs/ui-values.yaml
+        yq e -i '.image.repository="'${oidcui_docker_image}'"' deployments/configs/ui-values.yaml
       fi
       if [ -n "${oidcui_docker_version}" ]; then
-        yq e -i '.image.tag="'${oidcui_docker_version}'"' gcp/deployments/configs/ui-values.yaml
+        yq e -i '.image.tag="'${oidcui_docker_version}'"' deployments/configs/ui-values.yaml
       fi
-      helm install oidc-ui mosip/oidc-ui -n esignet -f gcp/deployments/configs/ui-values.yaml --version "$oidcui_helm_version" --wait   
-      cat gcp/deployments/configs/gateway.yaml | sed 's/DOMAIN/${_DOMAIN_}/' | kubectl apply -n esignet -f -
+      helm install oidc-ui mosip/oidc-ui -n esignet -f deployments/configs/ui-values.yaml --version "$oidcui_helm_version" --wait   
+      cat deployments/configs/gateway.yaml | sed 's/DOMAIN/${_DOMAIN_}/' | kubectl apply -n esignet -f -
       if [ -n "${keycloak_init_docker_image}" ]; then
-        yq e -i '.image.repository="'${keycloak_init_docker_image}'"' gcp/deployments/configs/keycloak-init.yaml
+        yq e -i '.image.repository="'${keycloak_init_docker_image}'"' deployments/configs/keycloak-init.yaml
       fi
       if [ -n "${keycloak_init_docker_version}" ]; then
-        yq e -i '.image.tag="'${keycloak_init_docker_version}'"' gcp/deployments/configs/keycloak-init.yaml
+        yq e -i '.image.tag="'${keycloak_init_docker_version}'"' deployments/configs/keycloak-init.yaml
       fi
       kubectl create configmap keycloak-host --from-literal=keycloak-internal-service-url=http://keycloak.esignet.svc.cluster.local:80/auth/ -n esignet &&
       helm -n esignet install keycloak-init mosip/keycloak-init --set frontend=https://${_DOMAIN_}/auth --version $keycloak_init_helm_version      
@@ -205,21 +214,21 @@ steps:
       then
         set -a
         export $(xargs < gcp/.env)
-        sh gcp/deployments/scripts/mock-config-init.sh ${_DB_NAME_} ${_SECRET_NAME_}
+        sh deployments/scripts/mock-config-init.sh ${_DB_NAME_} ${_SECRET_NAME_}
         apt-get update
         apt-get install wget -y
         wget https://github.com/mikefarah/yq/releases/download/v4.44.2/yq_linux_amd64.tar.gz -O - | tar xz && mv yq_linux_amd64 /usr/bin/yq
         if [ -n "${mock_ida_docker_image}" ]; then
-           yq e -i '.image.repository="'${mock_ida_docker_image}'"' gcp/deployments/configs/mock-identity-values.yaml
+           yq e -i '.image.repository="'${mock_ida_docker_image}'"' deployments/configs/mock-identity-values.yaml
         fi
         if [ -n "${mock_ida_docker_version}" ]; then
-           yq e -i '.image.tag="'${mock_ida_docker_version}'"' gcp/deployments/configs/mock-identity-values.yaml
+           yq e -i '.image.tag="'${mock_ida_docker_version}'"' deployments/configs/mock-identity-values.yaml
         fi
         helm  -n esignet template mock-identity-system mosip/mock-identity-system --version $mock_ida_helm_version -f deployments/configs/mock-identity-values.yaml > deploy.yaml
         yq  e -i 'select(di == 3).spec.template.spec.volumes += [{"name":"mock-identity-properties","configMap":{"name":"mock-identity-properties"}}]' deploy.yaml
         yq e -i 'select(di == 3).spec.template.spec.containers[0] += {"volumeMounts":[{"mountPath":"/home/mosip/mock-identity-system-default.properties","name":"mock-identity-properties","subPath":"mock-identity-system-default.properties"}]}' deploy.yaml
         kubectl apply -f deploy.yaml -n esignet
-        cat gcp/deployments/configs/mock-identity-virtualservice.yaml | sed 's/DOMAIN/${_DOMAIN_}/'  | kubectl apply -n esignet -f -
+        cat deployments/configs/mock-identity-virtualservice.yaml | sed 's/DOMAIN/${_DOMAIN_}/'  | kubectl apply -n esignet -f -
       else
         echo "Skipping mock service setup"
       fi
