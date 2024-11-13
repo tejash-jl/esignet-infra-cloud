@@ -132,7 +132,6 @@ steps:
       apt-get update
       apt-get install jq wget -y &&
       wget https://github.com/mikefarah/yq/releases/download/v4.44.2/yq_linux_amd64.tar.gz -O - | tar xz && mv yq_linux_amd64 /usr/bin/yq
-      pwd
       export $(grep -v '^#' .env | xargs -d '\n')
       echo "$mosip_repo"
       loadbalancerip=$(gcloud compute addresses describe "${_LB_NAME_}" --region "${_REGION_}" --format json | jq -r ".address")
