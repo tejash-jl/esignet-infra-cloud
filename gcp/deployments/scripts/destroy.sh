@@ -1,4 +1,4 @@
-kubectl delete clusterrolebinding cluster-admin-binding
+kubectl delete clusterrolebinding esignet-admin-binding
 kubectl delete ns esignet
 kubectl delete ns cert-manager
 kubectl delete ns kafka
