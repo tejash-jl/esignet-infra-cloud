@@ -212,7 +212,7 @@ steps:
       if [[ ${_ENABLE_MOCK_} == "true" ]]
       then
         set -a
-        export $(xargs < gcp/.env)
+        export $(xargs < .env)
         sh deployments/scripts/mock-config-init.sh ${_DB_NAME_} ${_SECRET_NAME_}
         apt-get update
         apt-get install wget -y
