@@ -9,7 +9,7 @@ steps:
   args:
     - -c
     - |
-      kubectl create clusterrolebinding cluster-admin-binding --clusterrole cluster-admin --user $(gcloud config get-value account)
+      kubectl create clusterrolebinding esignet-admin-binding --clusterrole cluster-admin --user $(gcloud config get-value account)
   waitFor:
     - 'get-credentials'
 
@@ -58,8 +58,17 @@ steps:
   args:
     - -c
     - |
-      kubectl apply --validate=false -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.1/cert-manager.crds.yaml
-      helm install cert-manager jetstack/cert-manager --version v1.14.1 -n cert-manager --create-namespace --set crds.enabled=true
+      if ! kubectl get crds | grep -q 'certificates.cert-manager.io'; then
+        echo "Cert-Manager is not installed. Proceeding with installation."
+
+        # Apply Cert-Manager CRDs
+        kubectl apply --validate=false -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.1/cert-manager.crds.yaml
+
+        # Install Cert-Manager via Helm
+        helm install cert-manager jetstack/cert-manager --version v1.14.1 -n cert-manager --create-namespace --set crds.enabled=true
+      else
+        echo "Cert-Manager is already installed."
+      fi
   waitFor:
     - 'helm-cert-manager-repo'
 
